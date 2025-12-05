@@ -44,7 +44,7 @@ def compute_SourceSpace(subject, subjects_dir, src_fname, plot=False, ss='volume
     src = None
     if ss == 'surface':
         src = mne.setup_source_space(subject, spacing='ico5', add_dist=None,
-                                subjects_dir=subjects_dir)
+                                     subjects_dir=subjects_dir)
         src.save(src_fname, overwrite=False)
         if plot:
             mne.viz.plot_bem(subject=subject, subjects_dir=subjects_dir,
@@ -79,7 +79,7 @@ def forward_model(subject, subjects_dir, fname_meg, trans, src, fwd_fname):
 def run_label_time_course(raw_MEG, cov, fwd, subjects_dir, subject, label_map, freq):
     global jobN4indv
 
-    outDIR = Path(f'{subjects_dir}', f'{subject}', 'mri', 'shen_label_time_course')        
+    outDIR = Path('../results')        
     if not os.path.exists(outDIR):
         os.makedirs(outDIR)
 
@@ -94,7 +94,10 @@ def run_label_time_course(raw_MEG, cov, fwd, subjects_dir, subject, label_map, f
     stcs = apply_lcmv_raw(raw_MEG, filters, verbose=False)
 
     print('Extracting label time course...')
+    atlas = os.path.join(subjects_dir, 'shen_1mm_268_parcellation.nii.gz')
+    
     atlas = os.path.join(subjects_dir, subject, 'mri', 'shen_freesurfer.mgz')
+    # If it fails, the user will know something is missing.
 
     label_stc = mne.extract_label_time_course(stcs, (atlas, label_map), fwd['src'], mode='auto', return_generator=False, verbose=True, mri_resolution=True)
 
@@ -124,7 +127,7 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
     raw_cov_fname = f'{DATA_DIR}/{subject}-rawcov_{volume_spacing}.fif.gz'
     raw_proj = f'{DATA_DIR}/{subject}_ses-rest_task-rest_proj.fif.gz'
 
-    trans = f'/projectnb/viscog01/yufang/camcan/cc700/camcan_coreg-master/trans/{subject}-trans.fif'
+    trans = os.path.join(subjects_dir, subject, 'mne_files', f'{subject}-trans.fif')
     
     file_trans = pathlib.Path(trans)
     file_ss = pathlib.Path(src_fname)
@@ -136,7 +139,7 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
 
     if not file_trans.exists():
         print (f'{trans} File doesnt exist...')
-        sys.exit(0)
+        # sys.exit(0)
 
     info = mne.io.read_info(fname_meg)
     # plot_registration(info, trans, subject, subjects_dir)
@@ -212,76 +215,26 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
 
 #---------------------------------------Main Program starts here-----------------------------#
 
-cases = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/full.txt'
-#cases = '/home/senthilp/caesar/camcan/cc700/freesurfer_output/missed.txt'
-subjects_dir = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output'
-with open(cases) as f:
-     case_list = f.read().splitlines()
-
-b = list(np.arange(1,269))
-a = [str(val) for val in b]
-label_map = dict(zip(a, b))
-
-# case_list = [
-#     'sub-CC720071',
-#     'sub-CC711027',
-#     'sub-CC620090',
-#     'sub-CC621011',
-#     'sub-CC621284',
-#     'sub-CC721392',
-#     'sub-CC610653',
-#     'sub-CC620549',
-#     'sub-CC723395',
-#     'sub-CC610046',
-#     'sub-CC212153',
-#     'sub-CC110037',
-#     'sub-CC120218',
-#     'sub-CC210519',
-#     'sub-CC221033',
-#     'sub-CC110087',
-#     'sub-CC110101',
-#     'sub-CC122172',
-#     'sub-CC122405',
-#     'sub-CC110411'
-# ]
-
-cases = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/full.txt'
-subjects_dir = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output'
-with open(cases) as f:
-     full_case_list = f.read().splitlines()
-
-# Divide the case list into 6 equal portions and select the i-th portion
-i = 1  # Change this value from 1 to 6 to select different portions
-total_portions = 6
-portion_size = len(full_case_list) // total_portions
-remainder = len(full_case_list) % total_portions
-
-# Calculate start and end indices for the i-th portion
-start_idx = (i - 1) * portion_size + min(i - 1, remainder)
-end_idx = i * portion_size + min(i, remainder)
-
-case_list = full_case_list[start_idx:end_idx]
-
 @timefn
 def main():
+    subjects_dir = '../data'
+    case_list = ['sub-CC110033']
+
+    b = list(np.arange(1,269))
+    a = [str(val) for val in b]
+    label_map = dict(zip(a, b))
+
     volume_spacing = 7.8
     global jobN4indv
     jobN4indv = 1;
-    pool = mp.Pool(processes=8) # each subj will use #jobN4indv threads 
-    for freq in [10]:
-        for subject in case_list:
-            flag = 0
-            if not os.path.exists(os.path.join(subjects_dir,subject,'mri','shen_label_time_course', f'shen_label_tc_lcmv_{freq}Hz.npy')):
-                flag = 1
-            # else:
-            #     tmpA=np.load(f'{subjects_dir}/{subject}/mri/shen_label_time_course/shen_label_tc_lcmv.npy')
-            #     if tmpA.shape[0]<268:
-            #         flag = 1
-            if flag==1:
-                pool.apply_async(run_subject_in_parallel, args=[subjects_dir, subject, volume_spacing, label_map, freq])
-    pool.close()    
-    pool.join() 
-
+    
+    for subject in case_list:
+        # Demo: run for 5 and 20 Hz, or just 10 as in original?
+        # MNI script had 5 and 20. This one had 10 hardcoded in original main loop.
+        # I should probably match the freqs used in get_envelope (5, 20).
+        # Let's use [5, 20] to be consistent with other scripts.
+        for freq in [5, 20]: 
+             run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, freq)
 
 if __name__ == "__main__":
     import time 

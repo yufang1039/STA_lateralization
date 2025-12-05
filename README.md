@@ -1,55 +1,33 @@
-## STA_lateralization
+# STA_lateralization
 
-Code for estimating MEG source time series at STA coordinates, extracting
-Shen-atlas label time courses, computing STA–to–brain envelope correlations, and
-comparing left vs right STA's connection with whole brain.
+Code supporting analysis of MEG source time series at subcortical STA coordinates, Shen-atlas label time courses, and left vs right hemispheric comparisons.
 
+## File descriptions
 
-### File descriptions
+1. `Figure 5/`: folder containing scripts and demo data for Figure 5 analysis (STA source estimation and surface plotting)
+2. `Figure 5/script/MNI_source_estimation_freq.py`: Python script to compute LCMV source time series at STA MNI coordinates
+3. `Figure 5/script/shen_atlas_source_estimation_freq.py`: Python script to extract Shen-268 atlas label time courses using LCMV beamforming
+4. `Figure 5/script/get_envelope_sta_shen.py`: Python script to compute orthogonalized log-envelope correlations between STA and Shen label time series
+5. `Figure 5/script/Figure_5C_plot_shen_surface.py`: Python script to generate surface visualizations of significant STA–brain correlations
+6. `comparison_left_right.py`: Python script to perform group-level left–right statistical comparisons and cluster-based permutation tests
 
-1. `MNI_source_estimation_freq.py`  
-   Compute LCMV source time series at predefined left/right STA MNI coordinates
-   (per subject, per frequency) and output
-   `right_STA_ts_lcmv_{freq}Hz.npy` / `left_STA_ts_lcmv_{freq}Hz.npy`.
+## Installation
 
-2. `shen_atlas_source_estimation_freq.py`  
-   Compute Shen-268 atlas label time courses using LCMV beamforming in a volume
-   source space, outputting `shen_label_tc_lcmv_{freq}Hz.npy` for each subject.
+Download the repository and you're good to go. Read the comments and documentation within each code for usage guidance.
 
-3. `get_envelope_sta_shen.py`  
-   Compute orthogonalized log-envelope correlations between STA time series
-   (left/right, 5/20 Hz) and Shen label time courses for each subject, outputting
-   `{side}_sta_label_envelope_corr_{freq}Hz.npy`.
+## Data Setup
 
-4. `comparison_left_right.py`  
-   Load STA–label envelope correlations across subjects, perform left–right
-   comparisons (summary statistics, region-by-region tests, cluster-based
-   permutation analysis), and generate group-level figures and CSV summaries.
+Before running the scripts, you need to download the required subject data:
 
-### Typical pipeline
+1. Download a single subject's directory from: https://osf.io/search
+2. Place the downloaded subject directory in the `Figure 5/data/` folder
+3. The subject directory should contain the necessary MRI files and MEG data in the expected structure (see `demo_MNI_source_estimation_freq.py` for the expected file organization)
 
-1. Run `MNI_source_estimation_freq.py` to generate STA time series per subject
-   and frequency.
-2. Run `shen_atlas_source_estimation_freq.py` to generate Shen label time
-   courses.
-3. Run `get_envelope_sta_shen.py` to compute STA–label envelope correlations
-   (left/right, 5/20 Hz).
-4. Run `comparison_left_right.py` for group-level left–right analyses and
-   visualizations.
+## Dependencies
 
-### Installation / dependencies
+1. Install the following Python libraries (e.g., via pip): mne, mne_connectivity, numpy, scipy, pandas, matplotlib, seaborn, nibabel, nilearn, tqdm, joblib
+2. Ensure FreeSurfer and MNE-Python environments are properly configured if running source estimation from scratch.
 
-Download or clone this project and ensure the following Python libraries are
-available (e.g., via `pip` or your HPC module system):
+## Compatibility
 
-- `mne`, `mne_connectivity`
-- `numpy`, `scipy`, `pandas`
-- `matplotlib`, `seaborn`
-- `nibabel`, `nilearn`
-- `tqdm`, `joblib`
-
-Several scripts use `multiprocessing.Pool` and set `OMP_NUM_THREADS`; on an HPC
-system, match process and thread counts to your allocated resources.
-
-
-
+The codes have been tested on standard Linux environments with Python 3.x.

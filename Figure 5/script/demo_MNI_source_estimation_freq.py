@@ -107,7 +107,7 @@ def run_coordinate_time_series(raw_MEG, cov, fwd, subjects_dir, subject, freq):
     and extracts source time series for the two target MNI coordinates.
     """
     # Create output directory
-    outDIR = Path(f'{subjects_dir}', f'{subject}', 'mri', 'sta_time_series')
+    outDIR = Path('../results')
     if not os.path.exists(outDIR):
         os.makedirs(outDIR)
 
@@ -202,7 +202,7 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, freq):
     raw_cov_fname = f'{DATA_DIR}/{subject}-rawcov_{volume_spacing}.fif.gz'
     raw_proj = f'{DATA_DIR}/{subject}_ses-rest_task-rest_proj.fif.gz'
 
-    trans = f'/projectnb/viscog01/yufang/camcan/cc700/camcan_coreg-master/trans/{subject}-trans.fif'
+    trans = os.path.join(subjects_dir, subject, 'mne_files', f'{subject}-trans.fif')
     
     file_trans = pathlib.Path(trans)
     file_ss = pathlib.Path(src_fname)
@@ -213,9 +213,9 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, freq):
 
     if not file_trans.exists():
         print(f'{trans} File doesn\'t exist...')
-        sys.exit(0)
+        # sys.exit(0) # Don't exit, just print warning for demo
 
-    info = mne.io.read_info(fname_meg)
+    # info = mne.io.read_info(fname_meg)
     print(file_ss)
     if not file_ss.exists():
         src = compute_SourceSpace(subject, subjects_dir, src_fname, plot=True, ss='volume', 
@@ -281,129 +281,18 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, freq):
 
 #---------------------------------------Main Program starts here-----------------------------#
 
-# cases = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/full.txt'
-# subjects_dir = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output'
-# with open(cases) as f:
-#     case_list = f.read().splitlines()
-
-# @timefn
-# def main():
-#     volume_spacing = 7.8
-#     global jobN4indv
-#     jobN4indv = 1
-#     pool = mp.Pool(processes=24)  # Adjust processes as needed.
-#     for freq in [5, 20]:
-#         for subject in case_list:
-#             outDIR = op.join(subjects_dir, subject, 'mri', 'sta_time_series')
-#             right_file = op.join(outDIR, f'right_STA_ts_lcmv_{freq}Hz.npy')
-#             left_file  = op.join(outDIR, f'left_STA_ts_lcmv_{freq}Hz.npy')
-#             flag = 1
-#             # if not (os.path.exists(right_file) and os.path.exists(left_file)):
-#             #     flag = 1
-#             if flag == 1:
-#                 pool.apply_async(run_subject_in_parallel, args=[subjects_dir, subject, volume_spacing, freq])
-#     pool.close()    
-#     pool.join() 
-
-
-cases = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/full.txt'
-subjects_dir = '/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output'
-log_file = '/projectnb/viscog01/yufang/Neural_representaion_proj/job_submission/mni_source_estimation_v3.o1088539'
-
-with open(cases) as f:
-    case_list = f.read().splitlines()
-
-# case_list = ['sub-CC110187',
-# 'sub-CC120264',
-# 'sub-CC120276',
-# 'sub-CC120313',
-# 'sub-CC120319',
-# 'sub-CC120376',
-# 'sub-CC120409',
-# 'sub-CC120462',
-# 'sub-CC120469',
-# 'sub-CC121158',
-# 'sub-CC121685',
-# 'sub-CC220372',
-# 'sub-CC222326',
-# 'sub-CC510208',
-# 'sub-CC510648']
-
-case_list = [
-    'sub-CC110187',
-    'sub-CC120264',
-    'sub-CC120276',
-    'sub-CC120313',
-    'sub-CC120376',
-    'sub-CC120409',
-    'sub-CC120462',
-    'sub-CC120469',
-    'sub-CC121685',
-    'sub-CC220372',
-    'sub-CC222326',
-    'sub-CC510208'
-]
-
-import os
-from datetime import datetime
-
-def check_subject_processed(subject, freq, log_file):
-    """Check if subject has been processed by looking for output lines in log file."""
-    right_pattern = f'Right STA time series saved to /projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/{subject}/mri/sta_time_series/right_STA_ts_lcmv_{freq}Hz.npy'
-    left_pattern = f'Left STA time series saved to /projectnb/viscog01/yufang/camcan/cc700/freesurfer_output/{subject}/mri/sta_time_series/left_STA_ts_lcmv_{freq}Hz.npy'
-    
-    try:
-        with open(log_file, 'r') as f:
-            log_content = f.read()
-            has_right = right_pattern in log_content
-            has_left = left_pattern in log_content
-            return has_right and has_left
-    except FileNotFoundError:
-        return False
-
-def get_files_before_cutoff(subject, cutoff_date):
-    """
-    Return list of (filepath, freq_values) of files modified before the cutoff date.
-    Only considers files in <subjects_dir>/<subject>/mri/sta_time_series whose modification times are before the cutoff.
-    Extracts frequency (Hz) from filenames matching right_STA_ts_lcmv_{freq}Hz.npy or left_STA_ts_lcmv_{freq}Hz.npy.
-    """
-    import re
-    result = []
-    sta_dir = os.path.join(subjects_dir, subject, 'mri', 'sta_time_series')
-    if not os.path.exists(sta_dir):
-        return []
-    files = os.listdir(sta_dir)
-    file_paths = [os.path.join(sta_dir, f) for f in files if os.path.isfile(os.path.join(sta_dir, f))]
-    freq_pattern = re.compile(r'(?:right|left)_STA_ts_lcmv_(\d+)Hz\.npy')
-    for file_path in file_paths:
-        mod_time = datetime.fromtimestamp(os.path.getmtime(file_path))
-        if mod_time <= cutoff_date:
-            match = freq_pattern.search(os.path.basename(file_path))
-            if match:
-                freq_val = int(match.group(1))
-                result.append((file_path, freq_val))
-    return result
-
 @timefn
 def main():
     volume_spacing = 7.8
     global jobN4indv
     jobN4indv = 1
-    cutoff_date = datetime(2025, 10, 27)
-    pool = mp.Pool(processes=16)
+    subjects_dir = '../data'
+    case_list = ['sub-CC110033']
+    
     for subject in case_list:
-        # Find all files before cutoff for this subject, organized per freq
-        before_cutoff_files = get_files_before_cutoff(subject, cutoff_date)
-        if not before_cutoff_files:
-            continue
-        freqs_before_cutoff = set(freq for fpath, freq in before_cutoff_files)
-        # Only process for those frequencies that have at least one file before cutoff_date
         for freq in [5, 20]:
-            relevant_files = [f for f, fq in before_cutoff_files if fq == freq]
-            if relevant_files:
-                pool.apply_async(run_subject_in_parallel, args=[subjects_dir, subject, volume_spacing, freq])
-    pool.close()
-    pool.join()
+            print(f"Processing {subject} at {freq}Hz")
+            run_subject_in_parallel(subjects_dir, subject, volume_spacing, freq)
 
 if __name__ == "__main__":
     startTime = time.time()
