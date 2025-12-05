@@ -2,36 +2,29 @@
 
 Code for estimating MEG source time series at STA coordinates, extracting
 Shen-atlas label time courses, computing STA–to–brain envelope correlations, and
-comparing left vs right hemispheres.
+comparing left vs right STA's connection with whole brain.
 
-Scripts assume the Cam-CAN / FreeSurfer directory layout under
-`/projectnb/viscog01/yufang/camcan/cc700/freesurfer_output` and subject IDs
-listed in `full.txt` (unless otherwise modified).
 
 ### File descriptions
 
 1. `MNI_source_estimation_freq.py`  
    Compute LCMV source time series at predefined left/right STA MNI coordinates
-   (per subject, per frequency) and save them as
-   `right_STA_ts_lcmv_{freq}Hz.npy` / `left_STA_ts_lcmv_{freq}Hz.npy` in each
-   subject’s `mri/sta_time_series` folder.
+   (per subject, per frequency) and output
+   `right_STA_ts_lcmv_{freq}Hz.npy` / `left_STA_ts_lcmv_{freq}Hz.npy`.
 
 2. `shen_atlas_source_estimation_freq.py`  
    Compute Shen-268 atlas label time courses using LCMV beamforming in a volume
-   source space, saving `shen_label_tc_lcmv_{freq}Hz.npy` in
-   `mri/shen_label_time_course` for each subject.
+   source space, outputting `shen_label_tc_lcmv_{freq}Hz.npy` for each subject.
 
 3. `get_envelope_sta_shen.py`  
    Compute orthogonalized log-envelope correlations between STA time series
-   (left/right, 5/20 Hz) and Shen label time courses for each subject, storing
-   `{side}_sta_label_envelope_corr_{freq}Hz.npy` in
-   `mri/shen_label_envelope_corr`.
+   (left/right, 5/20 Hz) and Shen label time courses for each subject, outputting
+   `{side}_sta_label_envelope_corr_{freq}Hz.npy`.
 
 4. `comparison_left_right.py`  
    Load STA–label envelope correlations across subjects, perform left–right
    comparisons (summary statistics, region-by-region tests, cluster-based
-   permutation analysis), and generate group-level figures and CSV summaries in
-   `Neural_representaion_proj/results`.
+   permutation analysis), and generate group-level figures and CSV summaries.
 
 ### Typical pipeline
 
