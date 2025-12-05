@@ -9,7 +9,6 @@ Code supporting analysis of MEG source time series at subcortical STA coordinate
 3. `Figure 5/script/shen_atlas_source_estimation_freq.py`: Python script to extract Shen-268 atlas label time courses using LCMV beamforming
 4. `Figure 5/script/get_envelope_sta_shen.py`: Python script to compute orthogonalized log-envelope correlations between STA and Shen label time series
 5. `Figure 5/script/Figure_5C_plot_shen_surface.py`: Python script to generate surface visualizations of significant STA–brain correlations
-6. `comparison_left_right.py`: Python script to perform group-level left–right statistical comparisons and cluster-based permutation tests
 
 ## Installation
 
