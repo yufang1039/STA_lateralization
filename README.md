@@ -72,7 +72,7 @@ To run the scripts in `MEG_pipeline/`:
     *   *Note: The scripts currently look for `../data`. Ensure your directory structure matches.*
 
 ### 2. Figure Data (for Figure 5)
-The data required for plotting Figure 5 is already included in `Figure 5/data/` (parcellation file and results CSV).
+The data required for plotting Figure 5 is already included in `Figure 5/data/`. This contains **preprocessed analyzed data** (parcellation file and statistical results CSV) derived from the full pipeline, enabling you to reproduce the figures directly.
 
 ## Instructions Guide
 
