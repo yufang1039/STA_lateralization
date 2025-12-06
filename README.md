@@ -6,7 +6,10 @@ Code supporting analysis of MEG source time series at subcortical STA coordinate
 
 The repository is organized as follows:
 
-1. `MEG_pipeline/`: Scripts for MEG source estimation and envelope correlation analysis.
+1. `MEG_pipeline/`: Scripts for MEG source estimation, anatomical preparation, and envelope correlation analysis.
+   - `regis_corr_vol.py`: Uses ANTs to compute and apply transforms (affine + warp) for volumetric correlation maps.
+   - `run_freesurfer.py`: Runs `recon-all` to generate FreeSurfer outputs (including `aparc.a2009s+aseg.mgz`) for each subject.
+   - `ants.sh`: Uses ANTs transforms to bring the Shen atlas into each subject’s FreeSurfer space (subject-space Shen parcellation).
    - `demo_MNI_source_estimation_freq.py`: Computes LCMV source time series at STA MNI coordinates.
    - `demo_shen_atlas_source_estimation_freq.py`: Extracts Shen-268 atlas label time courses using LCMV beamforming.
    - `demo_get_envelope_sta_shen.py`: Computes orthogonalized log-envelope correlations between STA and Shen label time series.
@@ -35,6 +38,11 @@ Please ensure the following Python libraries are installed. Recommended versions
 *   **joblib**: >= 1.0.0
 *   **tqdm**: >= 4.60.0
 
+In addition, the full MEG pipeline assumes you have:
+
+*   **FreeSurfer**: installed and configured (with `SUBJECTS_DIR` and `FREESURFER_HOME`), for running `run_freesurfer.py`.
+*   **ANTs** (Advanced Normalization Tools): installed and on your `PATH`, for running `regis_corr_vol.py` and `ants.sh`.
+
 ## Installation
 
 1.  Clone this repository:
@@ -47,7 +55,7 @@ Please ensure the following Python libraries are installed. Recommended versions
     ```bash
     pip install mne mne-connectivity numpy scipy pandas matplotlib seaborn nibabel nilearn joblib tqdm
     ```
-    *Note: Ensure you have FreeSurfer installed and configured if you plan to run source estimation from scratch (requires `SUBJECTS_DIR` setup).*
+    *Note: Ensure you have FreeSurfer and ANTs installed and configured if you plan to run the full pipeline from scratch (e.g., `SUBJECTS_DIR` setup for FreeSurfer and ANTs on your `PATH`).*
 
 ## Data Setup
 
@@ -76,32 +84,7 @@ The data required for plotting Figure 5 is already included in `Figure 5/data/`.
 
 ## Instructions Guide
 
-### Running the Analysis Pipeline (MEG_pipeline)
-
-These scripts process raw MEG data to estimate source time series and correlations.
-
-1.  **Source Estimation (STA Coordinates):**
-    Run `demo_MNI_source_estimation_freq.py` to extract time series from specific MNI coordinates.
-    ```bash
-    cd MEG_pipeline
-    python demo_MNI_source_estimation_freq.py
-    ```
-
-2.  **Source Estimation (Shen Atlas):**
-    Run `demo_shen_atlas_source_estimation_freq.py` to extract time series for the Shen atlas parcels.
-    ```bash
-    python demo_shen_atlas_source_estimation_freq.py
-    ```
-
-3.  **Envelope Correlation:**
-    Run `demo_get_envelope_sta_shen.py` to compute the correlation between STA and atlas time series.
-    ```bash
-    python demo_get_envelope_sta_shen.py
-    ```
-    *   Outputs will be saved to `STA_lateralization/results/`.
-    *   *Note: You may need to update the `case_list` variable in the scripts to match your subject IDs.*
-
-### reproducing Figure 5
+### Reproducing Figure 5
 
 To visualize the results as shown in Figure 5C:
 
@@ -115,3 +98,52 @@ To visualize the results as shown in Figure 5C:
     ```
     *   The script uses the pre-computed CSV in `../data`.
     *   Plots will be saved to `Figure 5/results/`.
+
+
+### Running the Analysis Pipeline (MEG_pipeline)
+
+These scripts process raw MEG data to estimate source time series and correlations. A typical end-to-end workflow before source estimation is:
+
+1.  **Compute ANTs registration / affine transforms (`regis_corr_vol.py`):**
+    Use `regis_corr_vol.py` to run ANTs registration and obtain the transforms (affine + warp) needed for later volumetric alignment.
+    ```bash
+    cd MEG_pipeline
+    python regis_corr_vol.py
+    ```
+
+2.  **Run FreeSurfer recon-all (`run_freesurfer.py`):**
+    Generate FreeSurfer surfaces and segmentations for all subjects (including `aparc.a2009s+aseg.mgz`).
+    ```bash
+    cd MEG_pipeline
+    python run_freesurfer.py
+    ```
+
+3.  **Warp Shen atlas into subject space (`ants.sh`):**
+    Use ANTs to bring the Shen atlas into each subject’s FreeSurfer space, producing a subject-space Shen parcellation.
+    ```bash
+    cd MEG_pipeline
+    bash ants.sh
+    ```
+
+4.  **Source Estimation (STA Coordinates):**
+    Run `demo_MNI_source_estimation_freq.py` to extract time series from specific MNI coordinates.
+    ```bash
+    cd MEG_pipeline
+    python demo_MNI_source_estimation_freq.py
+    ```
+
+5.  **Source Estimation (Shen Atlas):**
+    Run `demo_shen_atlas_source_estimation_freq.py` to extract time series for the Shen atlas parcels.
+    ```bash
+    cd MEG_pipeline
+    python demo_shen_atlas_source_estimation_freq.py
+    ```
+
+6.  **Envelope Correlation:**
+    Run `demo_get_envelope_sta_shen.py` to compute the correlation between STA and atlas time series.
+    ```bash
+    cd MEG_pipeline
+    python demo_get_envelope_sta_shen.py
+    ```
+    *   Outputs will be saved to `STA_lateralization/results/`.
+    *   *Note: You may need to update the `case_list` variable in the scripts to match your subject IDs.*
