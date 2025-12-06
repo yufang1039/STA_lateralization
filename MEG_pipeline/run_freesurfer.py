@@ -5,8 +5,8 @@ import multiprocessing as mp
 import time
 from functools import wraps
 
-os.putenv("SUBJECTS_DIR", "/home/senthilp/caesar/camcan/cc700/freesurfer_output/new")
-os.putenv("FREESURFER_HOME", "/home/senthilp/freesurfer")
+os.environ["SUBJECTS_DIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
+# os.putenv("FREESURFER_HOME", "/home/senthilp/freesurfer")
 os.system("echo $SUBJECTS_DIR")
 os.system("echo $FREESURFER_HOME")
 
@@ -37,7 +37,8 @@ if __name__ == '__main__':
     common_params = settings['COMMON']
     cases = data_params['cases']
     njobs = hyper_params['njobs']
-    anat_dir = data_params['anat_dir']
+    # anat_dir = data_params['anat_dir']
+    anat_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))
 
     with open(cases) as f:
         case_list = f.read().splitlines()
