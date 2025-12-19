@@ -31,21 +31,6 @@ LEGEND_WIDTH_RATIO = 0.4        # Width ratio for legend column in gridspec
 LEGEND_VERTICAL_OFFSET = 0.08   # Push legend up (positive) or down (negative)
 # =============================================================================
 
-# 2. Define Color Palette (Network -> {Base, Dark, Light})
-# Using manual hex codes for control
-# Dark for p < 0.01, Light for p >= 0.01 (but < 0.05)
-# network_colors = {
-#     'VAs': {'dark': '#4B0082', 'light': '#BA55D3'},  # Indigo / MediumOrchid
-#     'VI':  {'dark': '#00008B', 'light': '#6495ED'},  # DarkBlue / CornflowerBlue
-#     'FP':  {'dark': '#8B4500', 'light': '#FFD700'},  # Dark Orange-Brown / Gold
-#     'SAL': {'dark': '#006400', 'light': '#32CD32'},  # DarkGreen / LimeGreen
-#     'SC':  {'dark': '#008B8B', 'light': '#7FFFD4'},  # DarkCyan / Aquamarine
-#     'MF':  {'dark': '#191970', 'light': '#87CEEB'},  # MidnightBlue / SkyBlue
-#     'Mot': {'dark': '#8B008B', 'light': '#EE82EE'},  # DarkMagenta / Violet
-#     'DMN': {'dark': '#8B0000', 'light': '#FF6347'},  # DarkRed / Tomato
-#     'CBL': {'dark': '#8B4513', 'light': '#CD853F'}   # SaddleBrown / Peru
-# }
-
 network_colors = {
     'VAs': {'dark': '#b31902', 'light': '#ff2200'},  
     'VI':  {'dark': '#b37202', 'light': '#fca103'},  

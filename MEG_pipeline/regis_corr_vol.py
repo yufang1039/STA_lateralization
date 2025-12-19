@@ -7,21 +7,15 @@ from settings import Settings
 
 def non_linear_registration(case, freq, sensor):
     '''
-
     Usage:
 
     antsRegistrationSyN.sh -d ImageDimension -f FixedImage -m MovingImage -o OutputPrefix
-
      -d:  ImageDimension: 2 or 3 (for 2 or 3 dimensional registration of single volume)
-
      -f:  Fixed image(s) or source image(s) or reference image(s)
-
      -m:  Moving image(s) or target image(s)
-
      -o:  OutputPrefix: A prefix that is prepended to all output files.
-
      -n:  Number of threads
-
+     
     '''
     
     subdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data'))

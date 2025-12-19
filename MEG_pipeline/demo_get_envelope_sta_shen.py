@@ -71,7 +71,6 @@ def process_subject_freq_side(subjects_dir, subject, freq, side):
             label_ts = label_ts.reshape(1, -1)
         
         # Concatenate STA time series with label time series
-        # STA will be the first row (index 0)
         combined_ts = np.vstack([sta_ts, label_ts])
         
         # Wrap data in a list as expected by envelope_correlation
@@ -86,7 +85,7 @@ def process_subject_freq_side(subjects_dir, subject, freq, side):
         
         # Extract only the correlations between STA (index 0) and all label time series
         corr_data = corr_matrix.get_data()
-        sta_label_corr = corr_data[0, 1:]  # Shape should be (n_labels,)
+        sta_label_corr = corr_data[0, 1:]  
         
         # Save correlation results
         np.save(out_file, sta_label_corr)

@@ -39,7 +39,6 @@ def timefn(fn):
 
 def compute_SourceSpace(subject, subjects_dir, src_fname, plot=False, ss='volume', 
                         volume_spacing=7.8):
-    # 7.8 as the default
     src = None
     if ss == 'surface':
         src = mne.setup_source_space(subject, spacing='ico5', add_dist=None,
@@ -62,9 +61,6 @@ def compute_SourceSpace(subject, subjects_dir, src_fname, plot=False, ss='volume
 
 def forward_model(subject, subjects_dir, fname_meg, trans, src, fwd_fname):
     conductivity = (0.3,) 
-    # The conductivities to use for each shell. 
-    # Should be a single element for a one-layer model, or three elements for a three-layer model. 
-    # Defaults to [0.3, 0.006, 0.3]. The MNE-C default for a single-layer model would be [0.3]
     model = mne.make_bem_model(subject=subject, ico=4,
                             conductivity=conductivity,
                             subjects_dir=subjects_dir)
@@ -96,7 +92,6 @@ def run_label_time_course(raw_MEG, cov, fwd, subjects_dir, subject, label_map, f
     atlas = os.path.join(subjects_dir, 'shen_1mm_268_parcellation.nii.gz')
     
     atlas = os.path.join(subjects_dir, subject, 'mri', 'shen_freesurfer.mgz')
-    # If it fails, the user will know something is missing.
 
     label_stc = mne.extract_label_time_course(stcs, (atlas, label_map), fwd['src'], mode='auto', return_generator=False, verbose=True, mri_resolution=True)
 
@@ -134,14 +129,12 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
     file_proj = pathlib.Path(raw_proj)
     file_cov = pathlib.Path(cov_fname)
     file_rawcov = pathlib.Path(raw_cov_fname)
-    #t1 = nib.load(t1_fname)
+
 
     if not file_trans.exists():
         print (f'{trans} File doesnt exist...')
-        # sys.exit(0)
 
     info = mne.io.read_info(fname_meg)
-    # plot_registration(info, trans, subject, subjects_dir)
 
     print(file_ss)
     if not file_ss.exists():
@@ -151,7 +144,6 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
 
         src.save(src_fname, overwrite=False)
     src = mne.read_source_spaces(src_fname)
-    #view_SS_brain(subject, subjects_dir, src)
 
     if not file_fm.exists():
         forward_model(subject, subjects_dir, fname_meg, trans, src, fwd_fname)
@@ -208,8 +200,6 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, fr
     print(f'Band pass filter data [{l_freq}, {h_freq}]')
     raw_MEG = raw_proj_filtered.filter(l_freq=l_freq, h_freq=h_freq)
 
-    # raw_MEG = raw_proj_applied  # No filtering
-
     run_label_time_course(raw_MEG, cov, fwd, subjects_dir, subject, label_map, freq)
 
 #---------------------------------------Main Program starts here-----------------------------#
@@ -228,10 +218,6 @@ def main():
     jobN4indv = 1;
     
     for subject in case_list:
-        # Demo: run for 5 and 20 Hz, or just 10 as in original?
-        # MNI script had 5 and 20. This one had 10 hardcoded in original main loop.
-        # I should probably match the freqs used in get_envelope (5, 20).
-        # Let's use [5, 20] to be consistent with other scripts.
         for freq in [5, 20]: 
              run_subject_in_parallel(subjects_dir, subject, volume_spacing, label_map, freq)
 

@@ -213,9 +213,7 @@ def run_subject_in_parallel(subjects_dir, subject, volume_spacing, freq):
 
     if not file_trans.exists():
         print(f'{trans} File doesn\'t exist...')
-        # sys.exit(0) # Don't exit, just print warning for demo
 
-    # info = mne.io.read_info(fname_meg)
     print(file_ss)
     if not file_ss.exists():
         src = compute_SourceSpace(subject, subjects_dir, src_fname, plot=True, ss='volume', 
