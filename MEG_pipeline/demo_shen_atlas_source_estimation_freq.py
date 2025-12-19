@@ -24,7 +24,6 @@ from mne.beamformer import make_dics, apply_dics_csd, apply_dics,apply_dics_epoc
 import itertools
 import joblib
 
-
 def convert(seconds): 
     return time.strftime("%H:%M:%S", time.gmtime(seconds))
 
